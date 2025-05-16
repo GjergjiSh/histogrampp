@@ -17,7 +17,7 @@ static constexpr float kF5 = 25.3f;
 static constexpr float kF6 = 25.6f;
 } // namespace mock_periods
 
-template <int64_t BinCount, int64_t BinWidth> class Histogram {
+template <int64_t Offset, int64_t Step, int64_t NumPoints> class Histogram {
 public:
   explicit Histogram() = default;
   ~Histogram() = default;
@@ -28,14 +28,14 @@ public:
   Histogram &operator=(Histogram &&) = default;
 
   void update_period(float period) noexcept;
-  void print() const noexcept {
-    for (int i = 0; i < BinCount; ++i) {
-      printf("Bin %d: %u\n", i, bins_[i]);
-    }
+  void print(const char *unit) const noexcept {
+
   }
 
 private:
-  uint32_t bins_[BinCount] = {0};
+  void calculate_bin_split() const noexcept {}
+
+//   uint32_t bins_[BinCount] = {0};
   float last_period_ = 0.0f;
   float current_period_ = 0.0f;
 };
