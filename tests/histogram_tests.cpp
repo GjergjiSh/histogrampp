@@ -54,7 +54,7 @@ TEST_F(HistogramTest, TestManualDistribution) {
   auto bin_count = histogram.kBinCount;
   EXPECT_EQ(bin_count, 30);
 
-  static const microseconds kExpectedCycleTime = 2430;
+  static const microsecond kExpectedCycleTime = 2430;
   histogram.Update(kExpectedCycleTime);
   auto bins = histogram.GetBins();
   // 2430 - 2300 = 130, 130 / 10 = 13

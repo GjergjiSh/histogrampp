@@ -5,9 +5,9 @@
 #include <cstdlib>
 #include <iostream>
 
-using microseconds = uint64_t; // Histogram uses microseconds for cycle times
+using microsecond = uint64_t; // Histogram uses microseconds for cycle times
 
-template <uint64_t MinValue, uint64_t MaxValue, uint64_t BinWidth>
+template <microsecond MinValue, microsecond MaxValue, microsecond BinWidth>
 class Histogram {
   static_assert(MinValue < MaxValue, "MinValue must be less than MaxValue");
   static_assert(BinWidth > 0, "BinWidth must be greater than zero");
@@ -22,7 +22,7 @@ public:
   Histogram(Histogram &&) = default;
   Histogram &operator=(Histogram &&) = default;
 
-  inline void Update(microseconds cycle_time_us) noexcept {
+  inline void Update(microsecond cycle_time_us) noexcept {
     UpdateCycleTimes(cycle_time_us);
     UpdateBins(cycle_time_us);
   }
@@ -51,7 +51,7 @@ public:
   inline const uint64_t *GetBins() const noexcept { return distribution_; }
 
 private:
-  inline void UpdateCycleTimes(microseconds cycle_time) noexcept {
+  inline void UpdateCycleTimes(microsecond cycle_time) noexcept {
     if (cycle_time < lowest_cycle_time_ || lowest_cycle_time_ == 0) {
       lowest_cycle_time_ = cycle_time;
     }
@@ -61,7 +61,7 @@ private:
     last_cycle_time_ = cycle_time;
   }
 
-  inline void UpdateBins(microseconds cycle_time) noexcept {
+  inline void UpdateBins(microsecond cycle_time) noexcept {
     size_t bin_index;
     // Underflow goes in the first bin
     if (cycle_time < MinValue) {
@@ -77,7 +77,7 @@ private:
   }
 
   uint64_t distribution_[kBinCount] = {0};
-  microseconds last_cycle_time_ = 0;
-  microseconds lowest_cycle_time_ = 0;
-  microseconds highest_cycle_time_ = 0;
+  microsecond last_cycle_time_ = 0;
+  microsecond lowest_cycle_time_ = 0;
+  microsecond highest_cycle_time_ = 0;
 };

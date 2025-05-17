@@ -12,7 +12,7 @@ int main() {
 
     for (uint64_t i = 0; i < samples; ++i) {
       double sample = normal_dist(gen);
-      microseconds cycle_time_us = static_cast<microseconds>(sample);
+      microsecond cycle_time_us = static_cast<microsecond>(sample);
       histogram.Update(cycle_time_us);
     }
 
