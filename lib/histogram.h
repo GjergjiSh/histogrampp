@@ -13,6 +13,7 @@ class Histogram {
   static_assert(BinWidth > 0, "BinWidth must be greater than zero");
 
 public:
+  static constexpr uint64_t kBinCount = (MaxValue - MinValue) / BinWidth;
   explicit Histogram() = default;
   ~Histogram() = default;
 
@@ -21,7 +22,7 @@ public:
   Histogram(Histogram &&) = default;
   Histogram &operator=(Histogram &&) = default;
 
-  void Update(microseconds cycle_time_us) noexcept {
+  inline void Update(microseconds cycle_time_us) noexcept {
     UpdateCycleTimes(cycle_time_us);
     UpdateBins(cycle_time_us);
   }
@@ -47,8 +48,7 @@ public:
     }
   }
 
-  uint64_t GetBinCount() const noexcept { return kBinCount; }
-  const uint64_t *GetBins() const noexcept { return distribution_; }
+  inline const uint64_t *GetBins() const noexcept { return distribution_; }
 
 private:
   inline void UpdateCycleTimes(microseconds cycle_time) noexcept {
@@ -76,11 +76,8 @@ private:
     distribution_[bin_index]++;
   }
 
-  // clang-format off
-  static constexpr uint64_t kBinCount = (MaxValue - MinValue) / BinWidth;
-  uint64_t distribution_[kBinCount] = {0}; // distribution of cycle times in bins
-  microseconds last_cycle_time_ = 0;        // in microseconds
-  microseconds lowest_cycle_time_ = 0;      // in microseconds
-  microseconds highest_cycle_time_ = 0;     // in microseconds
-  // clang-format on
+  uint64_t distribution_[kBinCount] = {0};
+  microseconds last_cycle_time_ = 0;
+  microseconds lowest_cycle_time_ = 0;
+  microseconds highest_cycle_time_ = 0;
 };

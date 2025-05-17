@@ -9,7 +9,34 @@
             "program": "${workspaceFolder}/build/tests/histogram_tests",
             "args": [],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}/build",
+            "cwd": "${workspaceFolder}",
+            "environment": [
+                // Uncomment for verbose debugging output.
+                // Value doesn't matter, only presence is checked.
+                // { "name": "DEBUG_CYCLE_TIMES", "value": "1" },
+                // { "name": "DEBUG_BINS", "value": "1" },
+                { "name": "PRINT_VERBOSE", "value": "1" }
+            ],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "miDebuggerPath": "/usr/bin/gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+        },
+        {
+            "name": "Debug main",
+            "preLaunchTask": "build", // Build before debugging
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/main/main",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
             "environment": [
                 // Uncomment for verbose debugging output.
                 // Value doesn't matter, only presence is checked.

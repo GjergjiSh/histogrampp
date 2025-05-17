@@ -11,7 +11,7 @@ protected:
 
 TEST_F(HistogramTest, UniformDistribution) {
   Histogram<100, 200, 1> histogram;
-  auto bin_count = histogram.GetBinCount();
+  auto bin_count = histogram.kBinCount;
   EXPECT_EQ(bin_count, 100);
 
   for (uint64_t i = 100; i <= 200; ++i) {
@@ -33,7 +33,7 @@ TEST_F(HistogramTest, NormalDistribution) {
   using std::chrono::steady_clock;
 
   Histogram<2300, 2600, 10> histogram;
-  auto bin_count = histogram.GetBinCount();
+  auto bin_count = histogram.kBinCount;
   EXPECT_EQ(bin_count, 30);
 
   // Simulate a normal(ish) distribution of cycle times
@@ -51,7 +51,7 @@ TEST_F(HistogramTest, NormalDistribution) {
 
 TEST_F(HistogramTest, TestManualDistribution) {
   Histogram<2300, 2600, 10> histogram;
-  auto bin_count = histogram.GetBinCount();
+  auto bin_count = histogram.kBinCount;
   EXPECT_EQ(bin_count, 30);
 
   static const microseconds kExpectedCycleTime = 2430;
