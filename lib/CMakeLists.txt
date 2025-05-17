@@ -1,8 +1,7 @@
-file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
-file(GLOB HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/include/*.h)
+set(HISTOGRAM_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/histogram.h)
 
-add_library(histogram STATIC ${SOURCES} ${HEADERS})
+add_library(histogram INTERFACE ${HISTOGRAM_HEADER})
 
-target_include_directories(histogram PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
+target_include_directories(histogram INTERFACE
+    ${CMAKE_CURRENT_SOURCE_DIR}
 )
