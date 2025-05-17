@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cassert>
 #include <cstdint>
 #include <cstdlib>
 #include <iostream>
@@ -23,8 +24,8 @@ public:
     UpdateBins(cycle_time);
   }
 
-  void Print(const char *unit) const noexcept {
-    if (std::getenv("DEBUG_CYCLE_TIMES")) {
+  void Print(const char *unit = "") const noexcept {
+    if (std::getenv("PRINT_VERBOSE")) {
       std::cout << "Histogram:\n";
       for (uint32_t i = 0; i < kBinCount; ++i) {
         uint64_t start = MinValue + (BinWidth + i * BinWidth);
@@ -45,6 +46,7 @@ public:
   }
 
   size_t GetBinCount() const noexcept { return kBinCount; }
+  const uint32_t* GetBins() const noexcept { return bins_; }
 
 private:
   void UpdateCycleTimes(uint64_t cycle_time) noexcept {
@@ -65,21 +67,22 @@ private:
   }
 
   void UpdateBins(uint64_t cycle_time) noexcept {
-    if (cycle_time < MinValue || cycle_time > MaxValue) {
+    size_t bin_index;
+    if (cycle_time < MinValue) {
       std::cout << "Warning: cycle time " << cycle_time
-                << " out of bounds for histogram with min " << MinValue
-                << " and max " << MaxValue << '\n';
-      return;
-    }
-
-    const auto bin_index = kBinCount - (MaxValue - cycle_time) / BinWidth;
-    if (bin_index < kBinCount) {
-      bins_[bin_index]++;
+                << " is below the minimum value of " << MinValue
+                << ", adjusting to minimum.\n";
+      bin_index = 0;
+    } else if (cycle_time > MaxValue) {
+      std::cout << "Warning: cycle time " << cycle_time
+                << " is above the maximum value of " << MaxValue
+                << ", adjusting to maximum.\n";
+      bin_index = kBinCount - 1;
     } else {
-      std::cout << "Error: bin index out of range: " << bin_index
-                << ", for cycle time: " << cycle_time << std::endl;
+      bin_index = (cycle_time - MinValue) / BinWidth;
     }
 
+    bins_[bin_index]++;
     if (std::getenv("DEBUG_BINS")) {
       std::cout << "Updating bins: cycle time " << cycle_time
                 << " falls into bin index " << bin_index

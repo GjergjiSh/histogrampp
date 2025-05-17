@@ -9,29 +9,32 @@ protected:
   void TearDown() override {}
 };
 
-TEST_F(HistogramTest, UpdateHistogram) {
-  Histogram<230, 260, 1> histogram;
+TEST_F(HistogramTest, UniformDistribution) {
+  Histogram<100, 200, 1> histogram;
+  auto bin_count = histogram.GetBinCount();
+  EXPECT_EQ(bin_count, 100);
 
-  std::vector<uint64_t> cycle_times;
-  cycle_times.reserve(histogram.GetBinCount());
-  for (uint64_t i = 230; i <= 260; ++i) {
-    cycle_times.push_back(i);
+  for (uint64_t i = 100; i <= 200; ++i) {
+    histogram.Update(i);
   }
 
-  for (const auto &cycle_time : cycle_times) {
-    histogram.Update(cycle_time);
+  auto bins = histogram.GetBins();
+  for (size_t i = 0; i < bin_count; ++i) {
+    EXPECT_EQ(bins[i], 1u);
   }
 
   histogram.Print("ms * 100");
 }
 
-TEST_F(HistogramTest, UpdateHistogramWithSleep) {
+TEST_F(HistogramTest, NormalDistribution) {
   using std::chrono::duration;
   using std::chrono::duration_cast;
   using std::chrono::milliseconds;
   using std::chrono::steady_clock;
 
   Histogram<2300, 2600, 10> histogram;
+
+  // Simulate a normal(ish) distribution of cycle times
   std::mt19937_64 rng{std::random_device{}()};
   std::uniform_real_distribution<double> dist{2430, 2550};
 
@@ -40,4 +43,16 @@ TEST_F(HistogramTest, UpdateHistogramWithSleep) {
     histogram.Update(cycle_time);
   }
   histogram.Print("us");
+}
+
+TEST_F(HistogramTest, InvalidDistribution) {
+  Histogram<230, 260, 1> histogram;
+
+  // Test with a cycle time below the minimum value
+  histogram.Update(229);
+  histogram.Print();
+
+  // Test with a cycle time above the maximum value
+  histogram.Update(261);
+  histogram.Print();
 }
