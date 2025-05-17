@@ -49,6 +49,18 @@ TEST_F(HistogramTest, NormalDistribution) {
   histogram.Print("us");
 }
 
+TEST_F(HistogramTest, TestManualDistribution) {
+  Histogram<2300, 2600, 10> histogram;
+  auto bin_count = histogram.GetBinCount();
+  EXPECT_EQ(bin_count, 30);
+
+  static const microseconds kExpectedCycleTime = 2430;
+  histogram.Update(kExpectedCycleTime);
+  histogram.Print();
+  auto bins = histogram.GetBins();
+  EXPECT_EQ(bins[13], 1);
+}
+
 TEST_F(HistogramTest, InvalidDistribution) {
   Histogram<230, 260, 1> histogram;
 
