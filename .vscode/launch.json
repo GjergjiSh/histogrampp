@@ -10,7 +10,8 @@
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/build",
             "environment": [
-                { "name": "HISTO_VERBOSE", "value": "1" }
+                { "name": "DEBUG_CYCLE_TIMES", "value": "1" },
+                { "name": "DEBUG_BINS", "value": "1" }
             ],
             "externalConsole": false,
             "MIMode": "gdb",

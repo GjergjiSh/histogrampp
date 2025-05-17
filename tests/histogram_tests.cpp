@@ -1,5 +1,7 @@
 #include "histogram.h"
+#include <cstdint>
 #include <gtest/gtest.h>
+#include <random>
 
 class HistogramTest : public ::testing::Test {
 protected:
@@ -7,34 +9,35 @@ protected:
   void TearDown() override {}
 };
 
-TEST_F(HistogramTest, ExampleTest) {
-  Histogram<30, 10> histogram;
-  histogram.print("ms");
-}
+TEST_F(HistogramTest, UpdateHistogram) {
+  Histogram<230, 260, 1> histogram;
 
-TEST_F(HistogramTest, PrintWithOffset) {
-  Histogram<30, 10> histogram;
-  histogram.print("ms");
-}
-
-TEST_F(HistogramTest, UpdatePeriod) {
-  Histogram<30, 10> histogram;
-
-  // clang-format off
-  std::vector<double> values = {
-    23.0, 23.1, 23.2, 23.3, 23.4,
-    23.5, 23.6, 23.7, 23.8, 23.9,
-    24.0, 24.1, 24.2, 24.3, 24.4,
-    24.5, 24.6, 24.7, 24.8, 24.9,
-    25.0, 25.1, 25.2, 25.3, 25.4,
-    25.5, 25.6, 25.7, 25.8, 25.9,
-    26.0
-  };
-  // clang-format on
-
-  for (const auto &v : values) {
-    histogram.update(v);
+  std::vector<uint64_t> cycle_times;
+  cycle_times.reserve(histogram.GetBinCount());
+  for (uint64_t i = 230; i <= 260; ++i) {
+    cycle_times.push_back(i);
   }
 
-  histogram.print("ms");
+  for (const auto &cycle_time : cycle_times) {
+    histogram.Update(cycle_time);
+  }
+
+  histogram.Print("ms * 100");
+}
+
+TEST_F(HistogramTest, UpdateHistogramWithSleep) {
+  using std::chrono::duration;
+  using std::chrono::duration_cast;
+  using std::chrono::milliseconds;
+  using std::chrono::steady_clock;
+
+  Histogram<2300, 2600, 10> histogram;
+  std::mt19937_64 rng{std::random_device{}()};
+  std::uniform_real_distribution<double> dist{2430, 2550};
+
+  for (uint64_t i = 0; i < 1000000; ++i) {
+    double cycle_time = dist(rng);
+    histogram.Update(cycle_time);
+  }
+  histogram.Print("us");
 }

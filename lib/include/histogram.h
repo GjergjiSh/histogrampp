@@ -1,10 +1,14 @@
 #pragma once
 
 #include <cstdint>
-#include <cstdio>
 #include <cstdlib>
+#include <iostream>
 
-template <int64_t BinCount, int64_t BinWidth> class Histogram {
+template <uint64_t MinValue, uint64_t MaxValue, uint64_t BinWidth>
+class Histogram {
+  static_assert(MinValue < MaxValue, "MinValue must be less than MaxValue");
+  static_assert(BinWidth > 0, "BinWidth must be greater than zero");
+
 public:
   explicit Histogram() = default;
   ~Histogram() = default;
@@ -14,55 +18,78 @@ public:
   Histogram(Histogram &&) = default;
   Histogram &operator=(Histogram &&) = default;
 
-  void update(double cycle_time) noexcept {
-    const size_t bin_index = static_cast<size_t>(cycle_time / BinWidth);
+  void Update(uint64_t cycle_time) noexcept {
+    UpdateCycleTimes(cycle_time);
+    UpdateBins(cycle_time);
+  }
 
-    if (getenv("HISTO_VERBOSE")) {
-      printf("Updating histogram with cycle time: %.2f, "
-             "bin index: %zu, bin width: %ld\n",
-             cycle_time, bin_index, BinWidth);
-    }
-
-    if (bin_index >= 0 && bin_index < BinCount) {
-      bins_[bin_index]++;
-    } else {
-      printf("Warning: Period %.2f out of bounds for "
-             "histogram with %ld points and bin width %ld\n",
-             cycle_time, BinCount, BinWidth);
-    }
-
-    if (cycle_time < lowest_cycle_time_ || lowest_cycle_time_ == 0) {
-      lowest_cycle_time_ = cycle_time;
-    }
-
-    if (cycle_time > lowers_cycle_time) {
-      lowers_cycle_time = cycle_time;
-    }
-
-    last_cycle_time_ = cycle_time;
-  };
-
-  void print(const char *unit) const noexcept {
-    if (getenv("HISTO_VERBOSE")) {
-      printf("Histogram:\n");
-      for (int i = 0; i < BinCount; ++i) {
-        int start = BinWidth + i * BinWidth;
-        int end = start + BinWidth;
-        printf("[%d] [%d .. %d[ (%s) (%d)\n", i, start, end, unit, bins_[i]);
+  void Print(const char *unit) const noexcept {
+    if (std::getenv("DEBUG_CYCLE_TIMES")) {
+      std::cout << "Histogram:\n";
+      for (uint32_t i = 0; i < kBinCount; ++i) {
+        uint64_t start = MinValue + (BinWidth + i * BinWidth);
+        uint64_t end = start + BinWidth;
+        std::cout << "[" << i << "] [" << start << " .. " << end << "[ ("
+                  << unit << ") (" << bins_[i] << ")\n";
       }
-      printf("Last cycle time: %.2f %s\n", last_cycle_time_, unit);
-      printf("Lowest cycle time: %.2f %s\n", lowest_cycle_time_, unit);
-      printf("Highest cycle time: %.2f %s\n", lowers_cycle_time, unit);
+      // clang-format off
+      std::cout << "Last cycle time: " << last_cycle_time_ << ' ' << unit << '\n';
+      std::cout << "Lowest cycle time: " << lowest_cycle_time_ << ' ' << unit << '\n';
+      std::cout << "Highest cycle time: " << highest_cycle_time_ << ' ' << unit << '\n';
+      // clang-format on
     } else {
-      for (int i = 0; i < BinCount; ++i) {
-        printf("%d\n ", bins_[i]);
+      for (uint32_t i = 0; i < kBinCount; ++i) {
+        std::cout << bins_[i] << '\n';
       }
     }
   }
 
+  size_t GetBinCount() const noexcept { return kBinCount; }
+
 private:
-  uint32_t bins_[BinCount] = {0};
-  double last_cycle_time_ = 0;
-  double lowest_cycle_time_ = 0;
-  double lowers_cycle_time = 0;
+  void UpdateCycleTimes(uint64_t cycle_time) noexcept {
+    if (cycle_time < lowest_cycle_time_ || lowest_cycle_time_ == 0) {
+      lowest_cycle_time_ = cycle_time;
+    }
+    if (cycle_time > highest_cycle_time_) {
+      highest_cycle_time_ = cycle_time;
+    }
+    last_cycle_time_ = cycle_time;
+
+    if (std::getenv("DEBUG_CYCLE_TIMES")) {
+      std::cout << "Updating cycle times: "
+                << "Last: " << last_cycle_time_ << ", "
+                << "Lowest: " << lowest_cycle_time_ << ", "
+                << "Highest: " << highest_cycle_time_ << '\n';
+    }
+  }
+
+  void UpdateBins(uint64_t cycle_time) noexcept {
+    if (cycle_time < MinValue || cycle_time > MaxValue) {
+      std::cout << "Warning: cycle time " << cycle_time
+                << " out of bounds for histogram with min " << MinValue
+                << " and max " << MaxValue << '\n';
+      return;
+    }
+
+    const auto bin_index = kBinCount - (MaxValue - cycle_time) / BinWidth;
+    if (bin_index < kBinCount) {
+      bins_[bin_index]++;
+    } else {
+      std::cout << "Error: bin index out of range: " << bin_index
+                << ", for cycle time: " << cycle_time << std::endl;
+    }
+
+    if (std::getenv("DEBUG_BINS")) {
+      std::cout << "Updating bins: cycle time " << cycle_time
+                << " falls into bin index " << bin_index
+                << ", current count: " << bins_[bin_index] << '\n';
+    }
+  }
+
+  static constexpr uint64_t kBinCount = (MaxValue - MinValue) / BinWidth;
+  uint32_t bins_[kBinCount] = {0};
+  uint64_t last_cycle_time_ = 0;
+  uint64_t lowest_cycle_time_ = 0;
+  uint64_t highest_cycle_time_ = 0;
 };
