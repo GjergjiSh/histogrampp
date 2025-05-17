@@ -33,15 +33,19 @@ TEST_F(HistogramTest, NormalDistribution) {
   using std::chrono::steady_clock;
 
   Histogram<2300, 2600, 10> histogram;
+  auto bin_count = histogram.GetBinCount();
+  EXPECT_EQ(bin_count, 30);
 
   // Simulate a normal(ish) distribution of cycle times
   std::mt19937_64 rng{std::random_device{}()};
-  std::uniform_real_distribution<double> dist{2430, 2550};
+  std::uniform_real_distribution<double> dist{2.430, 2.550};
 
   for (uint64_t i = 0; i < 1000000; ++i) {
     double cycle_time = dist(rng);
-    histogram.Update(cycle_time);
+    uint64_t cycle_time_ms = static_cast<uint64_t>(cycle_time * 1000);
+    histogram.Update(cycle_time_ms);
   }
+
   histogram.Print("us");
 }
 

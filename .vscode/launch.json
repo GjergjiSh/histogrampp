@@ -3,6 +3,7 @@
     "configurations": [
         {
             "name": "Debug histogram_tests",
+            "preLaunchTask": "build", // Build before debugging
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/tests/histogram_tests",
@@ -10,7 +11,8 @@
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/build",
             "environment": [
-                // Uncomment for verbose debugging output. Value doesn't matter.
+                // Uncomment for verbose debugging output.
+                // Value doesn't matter, only presence is checked.
                 // { "name": "DEBUG_CYCLE_TIMES", "value": "1" },
                 // { "name": "DEBUG_BINS", "value": "1" },
                 { "name": "PRINT_VERBOSE", "value": "1" }
@@ -25,7 +27,6 @@
                     "ignoreFailures": true
                 }
             ],
-           "preLaunchTask": "build"
         }
     ]
 }
