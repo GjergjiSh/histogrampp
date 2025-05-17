@@ -21,7 +21,7 @@ public:
   Histogram(Histogram &&) = default;
   Histogram &operator=(Histogram &&) = default;
 
-  void Update(uint64_t cycle_time_us) noexcept {
+  void Update(microseconds cycle_time_us) noexcept {
     UpdateCycleTimes(cycle_time_us);
     UpdateBins(cycle_time_us);
   }
@@ -41,14 +41,14 @@ public:
       std::cout << "Highest cycle time: " << highest_cycle_time_ << ' ' << unit << '\n';
       // clang-format on
     } else {
-      for (uint32_t i = 0; i < kBinCount; ++i) {
+      for (uint64_t i = 0; i < kBinCount; ++i) {
         std::cout << distribution_[i] << '\n';
       }
     }
   }
 
   size_t GetBinCount() const noexcept { return kBinCount; }
-  const uint32_t *GetBins() const noexcept { return distribution_; }
+  const uint64_t *GetBins() const noexcept { return distribution_; }
 
 private:
   inline void UpdateCycleTimes(microseconds cycle_time) noexcept {
@@ -94,7 +94,7 @@ private:
 
   // clang-format off
   static constexpr uint64_t kBinCount = (MaxValue - MinValue) / BinWidth;
-  uint32_t distribution_[kBinCount] = {0}; // distribution of cycle times in bins
+  uint64_t distribution_[kBinCount] = {0}; // distribution of cycle times in bins
   microseconds last_cycle_time_ = 0;        // in microseconds
   microseconds lowest_cycle_time_ = 0;      // in microseconds
   microseconds highest_cycle_time_ = 0;     // in microseconds
