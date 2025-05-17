@@ -22,6 +22,8 @@ TEST_F(HistogramTest, UniformDistribution) {
   for (size_t i = 0; i < bin_count; ++i) {
     EXPECT_EQ(bins[i], 1u);
   }
+
+  histogram.Print();
 }
 
 TEST_F(HistogramTest, NormalDistribution) {
@@ -43,6 +45,8 @@ TEST_F(HistogramTest, NormalDistribution) {
     uint64_t cycle_time_ms = static_cast<uint64_t>(cycle_time * 1000);
     histogram.Update(cycle_time_ms);
   }
+
+  histogram.Print();
 }
 
 TEST_F(HistogramTest, TestManualDistribution) {
@@ -55,6 +59,8 @@ TEST_F(HistogramTest, TestManualDistribution) {
   auto bins = histogram.GetBins();
   // 2430 - 2300 = 130, 130 / 10 = 13
   EXPECT_EQ(bins[13], 1);
+
+  histogram.Print();
 }
 
 TEST_F(HistogramTest, InvalidDistribution) {
@@ -64,4 +70,6 @@ TEST_F(HistogramTest, InvalidDistribution) {
   histogram.Update(229);
   // Test with a cycle time above the maximum value
   histogram.Update(261);
+
+  histogram.Print();
 }

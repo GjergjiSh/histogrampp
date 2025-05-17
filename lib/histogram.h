@@ -3,6 +3,7 @@
 #include <cassert>
 #include <cstdint>
 #include <cstdlib>
+#include <iostream>
 
 using microseconds = uint64_t; // Histogram uses microseconds for cycle times
 
@@ -23,6 +24,27 @@ public:
   void Update(microseconds cycle_time_us) noexcept {
     UpdateCycleTimes(cycle_time_us);
     UpdateBins(cycle_time_us);
+  }
+
+  void Print(const char *unit = "") const noexcept {
+    if (std::getenv("PRINT_VERBOSE")) {
+      std::cout << "Histogram:\n";
+      for (uint32_t i = 0; i < kBinCount; ++i) {
+        uint64_t start = MinValue + i * BinWidth;
+        uint64_t end = start + BinWidth;
+        std::cout << "[" << i << "] [" << start << " .. " << end << "[ ("
+                  << unit << ") (" << distribution_[i] << ")\n";
+      }
+      // clang-format off
+      std::cout << "Last cycle time: " << last_cycle_time_ << ' ' << unit << '\n';
+      std::cout << "Lowest cycle time: " << lowest_cycle_time_ << ' ' << unit << '\n';
+      std::cout << "Highest cycle time: " << highest_cycle_time_ << ' ' << unit << '\n';
+      // clang-format on
+    } else {
+      for (uint64_t i = 0; i < kBinCount; ++i) {
+        std::cout << distribution_[i] << '\n';
+      }
+    }
   }
 
   uint64_t GetBinCount() const noexcept { return kBinCount; }
